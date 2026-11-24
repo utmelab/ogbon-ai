@@ -7,6 +7,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         access: resolve(__dirname, 'access.html'),
+        request: resolve(__dirname, 'request.html'),
+        purchase: resolve(__dirname, 'purchase.html'),
       },
     },
   },

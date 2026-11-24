@@ -161,5 +161,5 @@ forgot?.addEventListener('click', () => {
 })
 
 request?.addEventListener('click', () => {
-  setStatus('Access requests are reviewed privately.', 'ok')
+  window.location.href = '/request.html'
 })

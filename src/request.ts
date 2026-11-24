@@ -1,0 +1,99 @@
+import './style.css'
+
+const app = document.querySelector<HTMLDivElement>('#app')
+if (!app) throw new Error('Missing #app')
+
+app.innerHTML = `
+<div class="access">
+  <div class="access__bg" aria-hidden="true"></div>
+  <header class="access__top">
+    <a class="brand" href="/" aria-label="ỌGBỌN — home">
+      <svg class="brand__bolt" aria-hidden="true"><use href="#bolt"></use></svg>
+      <span class="brand__word">ỌGBỌN</span>
+      <span class="brand__slash" aria-hidden="true">/</span>
+      <span class="brand__desc">Request access</span>
+    </a>
+    <a class="access__back" href="/access.html">Back to sign in</a>
+  </header>
+
+  <main class="access__main">
+    <section class="access__card" aria-labelledby="request-title">
+      <p class="kicker">
+        <span class="kicker__dot" aria-hidden="true"></span>
+        Private node
+        <span class="kicker__tag">Application</span>
+      </p>
+      <h1 class="access__title" id="request-title">Request your <em>seat.</em></h1>
+      <p class="access__sub">A few details to place you in the queue.</p>
+
+      <form class="access__form" data-form novalidate>
+        <label class="field">
+          <span class="field__label">Full name</span>
+          <input class="field__input" name="name" autocomplete="name" placeholder="Your name" />
+        </label>
+        <label class="field">
+          <span class="field__label">Email</span>
+          <input class="field__input" type="email" name="email" autocomplete="email" placeholder="you@firm.com" />
+        </label>
+        <label class="field">
+          <span class="field__label">What do you trade?</span>
+          <input class="field__input" name="market" placeholder="FX, crypto, indices..." />
+        </label>
+        <label class="field">
+          <span class="field__label">Experience</span>
+          <select class="field__input" name="experience">
+            <option value="">Select one</option>
+            <option>Under 1 year</option>
+            <option>1–3 years</option>
+            <option>3–5 years</option>
+            <option>5+ years</option>
+          </select>
+        </label>
+
+        <button class="btn btn--primary access__submit" type="submit">
+          <span>Continue</span>
+          <span class="btn__arrow" aria-hidden="true">→</span>
+        </button>
+        <p class="access__status" role="status" aria-live="polite" data-status>All fields are required.</p>
+      </form>
+    </section>
+
+    <aside class="access__aside" aria-hidden="true">
+      <div class="access__mock">
+        <div class="access__mock-top">
+          <span>What you get</span>
+          <span class="access__mock-live"><i></i>Limited</span>
+        </div>
+        <div class="access__mock-metric"><span class="access__mock-k">Access</span><strong>Private node</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Intelligence</span><strong>Live flow</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Calls</span><strong>Reasoned</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Control</span><strong>Yours</strong></div>
+      </div>
+    </aside>
+  </main>
+</div>
+`
+
+const form = document.querySelector<HTMLFormElement>('[data-form]')
+const status = document.querySelector<HTMLElement>('[data-status]')
+
+form?.addEventListener('submit', (event) => {
+  event.preventDefault()
+  const data = new FormData(form)
+  const name = String(data.get('name') || '').trim()
+  const email = String(data.get('email') || '').trim()
+  const market = String(data.get('market') || '').trim()
+  const experience = String(data.get('experience') || '').trim()
+
+  if (!name || !email || !market || !experience) {
+    if (status) {
+      status.textContent = 'Please complete all fields.'
+      status.dataset.tone = 'alert'
+    }
+    return
+  }
+
+  sessionStorage.setItem('ogbon_request_email', email)
+  sessionStorage.setItem('ogbon_request_name', name)
+  window.location.href = '/purchase.html'
+})
