@@ -19,7 +19,7 @@ await page.goto('http://localhost:5180/', { waitUntil: 'networkidle' })
 await page.waitForTimeout(2800)
 await page.screenshot({ path: '/tmp/opencode/ogbon-desktop-fold.png' })
 
-for (const id of ['pipeline', 'decisions', 'instrument', 'guardrails']) {
+for (const id of ['intelligence', 'decisions', 'human']) {
   await page.locator('#' + id).scrollIntoViewIfNeeded()
   await page.waitForTimeout(1300)
   await page.screenshot({ path: `/tmp/opencode/ogbon-${id}.png` })
@@ -38,7 +38,7 @@ await mobile.goto('http://localhost:5180/', { waitUntil: 'networkidle' })
 await mobile.waitForTimeout(2800)
 await mobile.screenshot({ path: '/tmp/opencode/ogbon-mobile-fold.png' })
 
-for (const id of ['pipeline', 'decisions', 'instrument', 'guardrails']) {
+for (const id of ['intelligence', 'decisions', 'human']) {
   await mobile.locator('#' + id).scrollIntoViewIfNeeded()
   await mobile.waitForTimeout(1200)
   await mobile.screenshot({ path: `/tmp/opencode/ogbon-mobile-${id}.png` })
@@ -54,5 +54,10 @@ await mobile.locator('[data-menu-btn]').click()
 await mobile.waitForTimeout(700)
 await mobile.screenshot({ path: '/tmp/opencode/ogbon-mobile-menu.png' })
 
-console.log(JSON.stringify({ errors }, null, 2))
+const overflow = await mobile.evaluate(() => ({
+  scrollWidth: document.documentElement.scrollWidth,
+  innerWidth: window.innerWidth,
+}))
+
+console.log(JSON.stringify({ errors, overflow }, null, 2))
 await browser.close()

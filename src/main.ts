@@ -19,16 +19,14 @@ type DecisionRecord = {
   date: string
   short: string
   verdict: string
-  tone: 'violet' | 'ember'
+  tone: Tone
   confidence: number
-  bias: string
+  flow: string
   structure: string
   momentum: string
   context: string
   risk: string
   reason: string
-  support: string
-  resistance: string
   marker: string
   seed: number
   drift: number
@@ -40,27 +38,25 @@ const records: DecisionRecord[] = [
   {
     caseId: '014',
     date: '14 Mar',
-    short: 'Wait',
-    verdict: 'WAIT',
-    tone: 'ember',
-    confidence: 62,
-    bias: 'Bullish, late',
-    structure: 'Third test of 1.2618',
-    momentum: 'Weakening into 1.2740',
-    context: 'US CPI · 6h',
-    risk: '0.50% · stop 1.2571',
-    reason: 'The setup is real. The timing is not.',
-    support: '1.2618',
-    resistance: '1.2740',
-    marker: 'THIRD TEST',
+    short: 'Long',
+    verdict: 'LONG',
+    tone: 'violet',
+    confidence: 88,
+    flow: 'Institutional accumulation',
+    structure: 'Higher lows into resistance',
+    momentum: 'Aligned, not extended',
+    context: 'Supportive',
+    risk: 'Defined · invalidation set',
+    reason: 'Flow and structure agree. Risk is defined before entry.',
+    marker: 'SETUP',
     seed: 41,
     drift: 0.0014,
     markerIndex: 47,
     signals: [
-      { label: 'Structure', value: 74, tone: 'violet' },
-      { label: 'Momentum', value: 38, tone: 'ember' },
-      { label: 'Context', value: 30, tone: 'ember' },
-      { label: 'Risk', value: 80, tone: 'cyan' },
+      { label: 'Flow', value: 88, tone: 'violet' },
+      { label: 'Structure', value: 82, tone: 'violet' },
+      { label: 'Momentum', value: 76, tone: 'cyan' },
+      { label: 'Risk', value: 84, tone: 'cyan' },
     ],
   },
   {
@@ -68,25 +64,23 @@ const records: DecisionRecord[] = [
     date: '02 Apr',
     short: 'Short',
     verdict: 'SHORT',
-    tone: 'violet',
-    confidence: 81,
-    bias: 'Bearish',
-    structure: 'Lower highs since 1.2890',
-    momentum: 'Aligned, not extended',
+    tone: 'cyan',
+    confidence: 84,
+    flow: 'Distribution',
+    structure: 'Lower highs, trend intact',
+    momentum: 'Aligned',
     context: 'Clear',
-    risk: '0.50% · stop 1.2812',
-    reason: 'Structure, momentum and context agree. Risk is defined first.',
-    support: '1.2812',
-    resistance: '1.2890',
+    risk: 'Defined · invalidation set',
+    reason: 'Distribution and structure agree. The path is clear and the risk is small.',
     marker: 'BREAK',
     seed: 77,
     drift: -0.0026,
     markerIndex: 50,
     signals: [
-      { label: 'Structure', value: 86, tone: 'violet' },
+      { label: 'Flow', value: 86, tone: 'cyan' },
+      { label: 'Structure', value: 80, tone: 'violet' },
       { label: 'Momentum', value: 78, tone: 'cyan' },
-      { label: 'Context', value: 71, tone: 'cyan' },
-      { label: 'Risk', value: 66, tone: 'violet' },
+      { label: 'Risk', value: 74, tone: 'violet' },
     ],
   },
   {
@@ -95,42 +89,24 @@ const records: DecisionRecord[] = [
     short: 'Wait',
     verdict: 'WAIT',
     tone: 'ember',
-    confidence: 48,
-    bias: 'Range',
-    structure: '1.2500–1.2680 · 11 sessions',
+    confidence: 71,
+    flow: 'Mixed',
+    structure: 'Compression, no direction',
     momentum: 'Flat',
-    context: 'BoE · 2 days',
+    context: 'Event risk ahead',
     risk: 'No position',
     reason: 'A range is not a setup. Patience is the position.',
-    support: '1.2500',
-    resistance: '1.2680',
     marker: 'RANGE',
     seed: 19,
     drift: 0,
     markerIndex: 40,
     signals: [
-      { label: 'Structure', value: 40, tone: 'ember' },
+      { label: 'Flow', value: 42, tone: 'ember' },
+      { label: 'Structure', value: 38, tone: 'ember' },
       { label: 'Momentum', value: 45, tone: 'ember' },
-      { label: 'Context', value: 35, tone: 'ember' },
       { label: 'Risk', value: 90, tone: 'cyan' },
     ],
   },
-]
-
-const pipeline = [
-  { n: '01', name: 'Ingest', desc: 'OHLC · ticks · spreads' },
-  { n: '02', name: 'Feature', desc: 'Structure · levels · volatility' },
-  { n: '03', name: 'Context', desc: 'Sessions · macro · calendar' },
-  { n: '04', name: 'Risk', desc: 'Exposure · stop distance' },
-  { n: '05', name: 'Decide', desc: 'Long · short · wait' },
-  { n: '06', name: 'Explain', desc: 'The reason, in language' },
-]
-
-const guardrails = [
-  ['One instrument', 'GBP/USD only.'],
-  ['One timeframe', 'Daily close.'],
-  ['Risk before reward', '0.50% per idea.'],
-  ['No trade is a position', 'Standing aside is a decision.'],
 ]
 
 /* ------------------------------------------------------------------
@@ -193,7 +169,7 @@ function candleLayer(closes: number[], box: Box, seed: number) {
 
 function decisionChartMarkup(record: DecisionRecord) {
   const closes = makeCloses(record.seed, record.drift, 64, 0.5)
-  const layer = candleLayer(closes, { x0: 24, x1: 700, y0: 30, y1: 320 }, record.seed)
+  const layer = candleLayer(closes, { x0: 24, x1: 720, y0: 30, y1: 320 }, record.seed)
   const min = Math.min(...closes)
   const max = Math.max(...closes)
   const resistanceY = layer.y(max)
@@ -208,21 +184,16 @@ function decisionChartMarkup(record: DecisionRecord) {
   const grid = [0, 1, 2, 3, 4]
     .map((index) => {
       const y = 70 + index * 62
-      return `<line x1="0" y1="${y}" x2="700" y2="${y}"></line>`
+      return `<line x1="0" y1="${y}" x2="720" y2="${y}"></line>`
     })
     .join('')
 
-  const axis = ['1.2900', '1.2800', '1.2700', '1.2600', '1.2500']
-    .map((label, index) => `<text class="chart-label" x="714" y="${74 + index * 62}">${label}</text>`)
-    .join('')
-
-  return `<svg viewBox="0 0 760 360" role="img" aria-label="Illustrative GBP/USD daily chart for case ${record.caseId}">
+  return `<svg viewBox="0 0 760 360" role="img" aria-label="Illustrative market structure chart for case ${record.caseId}">
     <g class="chart-grid">${grid}</g>
-    ${axis}
-    <line class="chart-level" x1="0" y1="${resistanceY.toFixed(1)}" x2="700" y2="${resistanceY.toFixed(1)}"></line>
-    <line class="chart-level chart-level--support" x1="0" y1="${supportY.toFixed(1)}" x2="700" y2="${supportY.toFixed(1)}"></line>
-    <text class="chart-label chart-label--resistance" x="0" y="${(resistanceY - 6).toFixed(1)}">RESISTANCE ${record.resistance}</text>
-    <text class="chart-label chart-label--support" x="0" y="${(supportY + 12).toFixed(1)}">SUPPORT ${record.support}</text>
+    <line class="chart-level" x1="0" y1="${resistanceY.toFixed(1)}" x2="720" y2="${resistanceY.toFixed(1)}"></line>
+    <line class="chart-level chart-level--support" x1="0" y1="${supportY.toFixed(1)}" x2="720" y2="${supportY.toFixed(1)}"></line>
+    <text class="chart-label chart-label--resistance" x="0" y="${(resistanceY - 6).toFixed(1)}">RESISTANCE</text>
+    <text class="chart-label chart-label--support" x="0" y="${(supportY + 12).toFixed(1)}">SUPPORT</text>
     <g class="chart-candles">${layer.candles}</g>
     <path class="chart-line" pathLength="1" d="${layer.line}"></path>
     <line class="chart-crosshair" x1="${markerX.toFixed(1)}" y1="20" x2="${markerX.toFixed(1)}" y2="332"></line>
@@ -230,16 +201,6 @@ function decisionChartMarkup(record: DecisionRecord) {
     <circle class="chart-marker" cx="${markerX.toFixed(1)}" cy="${markerY.toFixed(1)}" r="4"></circle>
     <circle class="chart-end" cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="3"></circle>
     <text class="chart-label chart-label--support" x="${(markerX - 8).toFixed(1)}" y="${(markerY - 12).toFixed(1)}" text-anchor="end">${record.marker}</text>
-  </svg>`
-}
-
-function instrumentStripMarkup() {
-  const closes = makeCloses(29, 0.0016, 96, 0.46)
-  const layer = candleLayer(closes, { x0: 0, x1: 1200, y0: 20, y1: 180 }, 29)
-
-  return `<svg viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
-    <g class="chart-candles">${layer.candles}</g>
-    <path class="chart-line chart-line--soft" pathLength="1" d="${layer.line}"></path>
   </svg>`
 }
 
@@ -251,7 +212,7 @@ const app = document.querySelector<HTMLDivElement>('#app')
 if (!app) throw new Error('Missing #app')
 
 app.innerHTML = `
-<a class="skip-link" href="#pipeline">Skip to content</a>
+<a class="skip-link" href="#intelligence">Skip to content</a>
 <div class="scroll-progress" aria-hidden="true"><span data-progress></span></div>
 
 <header class="topbar" data-header>
@@ -260,13 +221,12 @@ app.innerHTML = `
       <svg class="brand__bolt" aria-hidden="true"><use href="#bolt"></use></svg>
       <span class="brand__word">ỌGBỌN</span>
       <span class="brand__slash" aria-hidden="true">/</span>
-      <span class="brand__desc">Forex Intelligence</span>
+      <span class="brand__desc">Market Intelligence</span>
     </a>
     <nav class="nav" aria-label="Primary">
-      <a href="#pipeline">Pipeline</a>
+      <a href="#intelligence">Intelligence</a>
       <a href="#decisions">Decisions</a>
-      <a href="#instrument">Instrument</a>
-      <a href="#guardrails">Guardrails</a>
+      <a href="#human">Human</a>
     </nav>
     <div class="topbar__end">
       <span class="status"><i class="status__dot" aria-hidden="true"></i>System online</span>
@@ -282,10 +242,9 @@ app.innerHTML = `
 
 <div class="menu" id="menu" aria-hidden="true" data-menu>
   <nav class="menu__nav" aria-label="Mobile">
-    <a href="#pipeline"><span>01</span> Pipeline</a>
+    <a href="#intelligence"><span>01</span> Intelligence</a>
     <a href="#decisions"><span>02</span> Decisions</a>
-    <a href="#instrument"><span>03</span> Instrument</a>
-    <a href="#guardrails"><span>04</span> Guardrails</a>
+    <a href="#human"><span>03</span> Human</a>
   </nav>
   <div class="menu__foot">
     <span>Private node · Lagos, NG</span>
@@ -302,19 +261,20 @@ app.innerHTML = `
       <div class="hero__copy">
         <p class="kicker">
           <span class="kicker__dot" aria-hidden="true"></span>
-          Autonomous Forex Intelligence
+          Institutional-grade market intelligence
           <span class="kicker__tag">Private node</span>
         </p>
         <h1 class="hero__title">
-          The <em>thinking</em><br />behind the trade.
+          The AI <em>reasons.</em><br />You decide.
         </h1>
         <p class="hero__sub">
-          A private AI for GBP/USD. It reads structure, momentum and risk —
-          then decides. Or stands aside.
+          A private intelligence layer. It reads real-time institutional flow,
+          weighs the risk, and returns a reasoned call — with the why. Nothing
+          executes without you.
         </p>
         <div class="hero__actions">
-          <a class="btn btn--primary" href="#pipeline">
-            <span>Enter the pipeline</span>
+          <a class="btn btn--primary" href="#intelligence">
+            <span>See the intelligence</span>
             <span class="btn__arrow" aria-hidden="true">↓</span>
           </a>
           <a class="btn btn--ghost" href="#decisions">
@@ -323,24 +283,24 @@ app.innerHTML = `
           </a>
         </div>
         <ul class="hero__facts">
-          <li><b>AI</b><span>Reasoning engine</span></li>
-          <li><b>01</b><span>Instrument</span></li>
-          <li><b>D1</b><span>Timeframe</span></li>
-          <li><b>1</b><span>Verdict</span></li>
+          <li><b>AI</b><span>Reasoning layer</span></li>
+          <li><b>Live</b><span>Institutional data</span></li>
+          <li><b>Human</b><span>Final call</span></li>
+          <li><b>Zero</b><span>Auto-execution</span></li>
         </ul>
       </div>
 
       <div class="hero__core">
         <div class="core">
           <canvas class="core__canvas" data-neural aria-hidden="true"></canvas>
-          <span class="core__label core__label--tl"><b>Input</b>Price feed<em data-price>1.2638</em></span>
-          <span class="core__label core__label--tr"><b>Structure</b>HH · HL</span>
-          <span class="core__label core__label--bl"><b>Momentum</b>Weakening</span>
-          <span class="core__label core__label--br"><b>Risk</b>0.50%</span>
+          <span class="core__label core__label--tl"><b>Input</b>Institutional flow</span>
+          <span class="core__label core__label--tr"><b>Context</b>Real-time</span>
+          <span class="core__label core__label--bl"><b>Risk</b>Defined</span>
+          <span class="core__label core__label--br"><b>Reasoning</b>Explained</span>
           <div class="core__center">
             <span class="core__center-k">Verdict</span>
-            <strong class="core__center-v">WAIT</strong>
-            <span class="core__center-s">62% conviction</span>
+            <strong class="core__center-v">LONG</strong>
+            <span class="core__center-s">Awaiting your review</span>
           </div>
         </div>
         <div class="core__readout">
@@ -353,43 +313,51 @@ app.innerHTML = `
 
     <div class="hero__tape">
       <div class="wrap hero__tape-inner">
-        <div class="tape-cell"><span>Pair</span><b>GBP/USD</b></div>
-        <div class="tape-cell"><span>Price</span><b data-price>1.2638</b></div>
-        <div class="tape-cell"><span>Bias</span><b>Bullish</b></div>
-        <div class="tape-cell"><span>Structure</span><b>HH · HL</b></div>
-        <div class="tape-cell"><span>Momentum</span><b>Weak</b></div>
-        <div class="tape-cell tape-cell--verdict"><span>Verdict</span><b>WAIT</b></div>
+        <div class="tape-cell"><span>Mode</span><b>Intelligence</b></div>
+        <div class="tape-cell"><span>Data</span><b>Institutional</b></div>
+        <div class="tape-cell"><span>Bias</span><b>Long</b></div>
+        <div class="tape-cell"><span>Risk</span><b>Defined</b></div>
+        <div class="tape-cell"><span>Execution</span><b>Manual</b></div>
+        <div class="tape-cell tape-cell--verdict"><span>Verdict</span><b>Your call</b></div>
       </div>
     </div>
   </section>
 
-  <section class="section pipeline" id="pipeline">
+  <section class="section intelligence" id="intelligence">
     <div class="wrap">
-      <div class="section__head" data-reveal>
-        <p class="eyebrow"><span>01</span> The pipeline</p>
-        <h2 class="section__title">Signal in. <em>Verdict out.</em></h2>
-        <p class="section__lead">Six stages. Every input accounted for.</p>
+      <div class="section__head section__head--split" data-reveal>
+        <div>
+          <p class="eyebrow"><span>01</span> The intelligence layer</p>
+          <h2 class="section__title">The system gets you to <em>90.</em> You take it to <em>100.</em></h2>
+        </div>
+        <p class="section__lead">
+          It does the reading and the reasoning. You bring the judgment no model has.
+        </p>
       </div>
 
-      <ol class="pipeline__grid">
-        ${pipeline
-          .map(
-            (stage, index) => `
-          <li class="stage" data-reveal style="--d: ${index * 60}ms">
-            <span class="stage__n">${stage.n}</span>
-            <span class="stage__icon" aria-hidden="true"><i></i></span>
-            <h3 class="stage__name">${stage.name}</h3>
-            <p class="stage__desc">${stage.desc}</p>
-            <span class="stage__state">OK</span>
-          </li>`,
-          )
-          .join('')}
-      </ol>
+      <div class="ratio" data-reveal>
+        <div class="ratio__cell">
+          <span class="ratio__v">90<small>%</small></span>
+          <span class="ratio__k">The system</span>
+          <p>Real-time institutional flow, structure, momentum and risk — calls with at least 90% success.</p>
+        </div>
+        <span class="ratio__op" aria-hidden="true">+</span>
+        <div class="ratio__cell">
+          <span class="ratio__v">10<small>%</small></span>
+          <span class="ratio__k">You</span>
+          <p>Your context, your conviction, your read of the moment.</p>
+        </div>
+        <span class="ratio__op" aria-hidden="true">=</span>
+        <div class="ratio__cell ratio__cell--total">
+          <span class="ratio__v">100<small>%</small></span>
+          <span class="ratio__k">The call</span>
+          <p>A decision you understand, trust, and execute yourself.</p>
+        </div>
+      </div>
 
-      <div class="pipeline__trace" data-reveal aria-hidden="true">
-        <span>TRACE</span>
-        <div class="pipeline__track"><i></i></div>
-        <span>14/14 signals resolved</span>
+      <div class="manifesto" data-reveal>
+        <p>Not a signal feed. Not a set-and-forget bot. <em>An intelligence layer.</em></p>
+        <p>No copied calls. No blind execution. <em>No trade without you.</em></p>
       </div>
     </div>
   </section>
@@ -401,7 +369,7 @@ app.innerHTML = `
           <p class="eyebrow"><span>02</span> Decision engine</p>
           <h2 class="section__title">The case, <em>not the call.</em></h2>
         </div>
-        <p class="section__lead">Three records. The chart, the evidence, the verdict.</p>
+        <p class="section__lead">Three records. Evidence, risk, reasoning.</p>
       </div>
 
       <div class="case-tabs" role="tablist" aria-label="Decision records" data-tabs></div>
@@ -409,13 +377,13 @@ app.innerHTML = `
       <article class="case" id="case" role="tabpanel" aria-live="polite" data-panel>
         <div class="case__chart">
           <div class="case__chart-head">
-            <span>GBP/USD · D1</span>
+            <span>Market · Structure</span>
             <span data-field="caseId"></span>
           </div>
           <div class="case__chart-body" data-chart></div>
           <div class="case__chart-foot">
-            <span>64 sessions · daily</span>
-            <span>Levels marked</span>
+            <span>Real-time flow</span>
+            <span>Reasoning trace</span>
           </div>
         </div>
 
@@ -429,7 +397,7 @@ app.innerHTML = `
           <div class="case__signals" data-signals></div>
 
           <dl class="case__rows">
-            <div class="case__row"><dt>Bias</dt><dd data-field="bias"></dd></div>
+            <div class="case__row"><dt>Flow</dt><dd data-field="flow"></dd></div>
             <div class="case__row"><dt>Structure</dt><dd data-field="structure"></dd></div>
             <div class="case__row"><dt>Momentum</dt><dd data-field="momentum"></dd></div>
             <div class="case__row"><dt>Context</dt><dd data-field="context"></dd></div>
@@ -441,57 +409,57 @@ app.innerHTML = `
 
         <div class="case__foot">
           <span>Reasoned · not predicted</span>
-          <span>Sealed · 06:00 WAT</span>
+          <span>Reviewed · human in the loop</span>
         </div>
       </article>
     </div>
   </section>
 
-  <section class="section instrument" id="instrument">
-    <div class="wrap">
-      <div class="instrument__head" data-reveal>
-        <p class="eyebrow"><span>03</span> The instrument</p>
-        <span class="instrument__tag">GBP/USD · D1 · Spot</span>
-      </div>
-
-      <div class="instrument__stage" data-reveal>
-        <div class="instrument__strip" aria-hidden="true">${instrumentStripMarkup()}</div>
-        <h2 class="instrument__symbol">GBP<span class="instrument__slash" aria-hidden="true"></span><span class="sr-only">/</span>USD</h2>
-        <p class="instrument__price"><b data-price>1.2638</b><span>+0.42%</span></p>
-      </div>
-
-      <div class="instrument__stats" data-reveal>
-        <div class="stat"><p class="stat__v">40<small>yrs</small></p><p class="stat__k">History</p></div>
-        <div class="stat"><p class="stat__v">01</p><p class="stat__k">Instrument</p></div>
-        <div class="stat"><p class="stat__v">D1</p><p class="stat__k">Timeframe</p></div>
-        <div class="stat"><p class="stat__v">0.50<small>%</small></p><p class="stat__k">Risk per idea</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section guardrails" id="guardrails">
-    <span class="guardrails__watermark" aria-hidden="true">Ọ</span>
+  <section class="section human" id="human">
     <div class="wrap">
       <div class="section__head section__head--split" data-reveal>
         <div>
-          <p class="eyebrow"><span>04</span> Guardrails</p>
-          <h2 class="section__title">Intelligence needs <em>constraints.</em></h2>
+          <p class="eyebrow"><span>03</span> Human in the loop</p>
+          <h2 class="section__title">It never trades <em>without you.</em></h2>
         </div>
-        <p class="section__lead">Four rules. No exceptions.</p>
+        <p class="section__lead">
+          The AI reasons and explains. You review, decide, and execute.
+        </p>
       </div>
 
-      <div class="guardrails__grid">
-        ${guardrails
-          .map(
-            ([title, desc], index) => `
-          <article class="rule" data-reveal style="--d: ${index * 50}ms">
-            <span class="rule__n">${String(index + 1).padStart(2, '0')}</span>
-            <h3 class="rule__title">${title}</h3>
-            <p class="rule__desc">${desc}</p>
-          </article>`,
-          )
-          .join('')}
+      <div class="handoff" data-reveal>
+        <div class="handoff__flow">
+          <span class="handoff__step">AI reasons</span>
+          <i aria-hidden="true">→</i>
+          <span class="handoff__step">You review</span>
+          <i aria-hidden="true">→</i>
+          <span class="handoff__step handoff__step--you">You execute</span>
+        </div>
+        <div class="handoff__grid">
+          <article class="handoff__side">
+            <span class="handoff__tag">The intelligence</span>
+            <h3>Reads. Weighs. Explains.</h3>
+            <ul>
+              <li>Real-time institutional flow</li>
+              <li>Structure, momentum, risk</li>
+              <li>A verdict, with the why</li>
+            </ul>
+          </article>
+          <article class="handoff__side handoff__side--you">
+            <span class="handoff__tag">The authority</span>
+            <h3>Reviews. Decides. Owns.</h3>
+            <ul>
+              <li>Your context and conviction</li>
+              <li>Your final judgment</li>
+              <li>Your execution</li>
+            </ul>
+          </article>
+        </div>
       </div>
+
+      <p class="handoff__note" data-reveal>
+        It hands you the reasoning. The decision stays yours.
+      </p>
     </div>
   </section>
 </main>
@@ -501,18 +469,19 @@ app.innerHTML = `
     <div class="footer__top">
       <div>
         <p class="footer__line">Wisdom, before the trade.</p>
-        <p class="footer__sub">A private intelligence. Not a product.</p>
+        <p class="footer__sub">A private intelligence layer. Not a signal service.</p>
       </div>
       <div class="footer__meta">
         <span>Lagos, NG</span>
         <span data-clock>--:--</span>
-        <span>Private node</span>
+        <span>Human in the loop</span>
       </div>
     </div>
     <div class="footer__word" aria-hidden="true">ỌGBỌN</div>
     <div class="footer__fine">
       <span>© <span data-year>2026</span> ỌGBỌN</span>
-      <span>GBP/USD · Daily</span>
+      <span>Institutional data</span>
+      <span>Human execution</span>
       <span>Mark · Vite bolt</span>
     </div>
   </div>
@@ -587,7 +556,7 @@ if (tabsEl && panel) {
     const record = records[index]
     if (!record) return
 
-    fields.get('bias')!.textContent = record.bias
+    fields.get('flow')!.textContent = record.flow
     fields.get('structure')!.textContent = record.structure
     fields.get('momentum')!.textContent = record.momentum
     fields.get('context')!.textContent = record.context
@@ -599,6 +568,7 @@ if (tabsEl && panel) {
     const verdict = fields.get('verdict')!
     verdict.textContent = record.verdict
     verdict.classList.toggle('is-violet', record.tone === 'violet')
+    verdict.classList.toggle('is-cyan', record.tone === 'cyan')
 
     const chart = panelEl.querySelector<HTMLElement>('[data-chart]')
     if (chart) chart.innerHTML = decisionChartMarkup(record)
@@ -725,7 +695,7 @@ if (menuBtn && menu) {
 }
 
 /* ------------------------------------------------------------------
-   Clock, session, year
+   Clock & year
    ------------------------------------------------------------------ */
 
 const clocks = Array.from(document.querySelectorAll<HTMLElement>('[data-clock]'))
@@ -736,26 +706,10 @@ const timeFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Africa/Lagos',
 })
 
-function currentSession() {
-  const now = new Date()
-  const hour = now.getUTCHours() + now.getUTCMinutes() / 60
-
-  if (hour >= 13 && hour < 17) return 'London · New York'
-  if (hour >= 8 && hour < 17) return 'London'
-  if (hour >= 13 && hour < 22) return 'New York'
-  if (hour >= 0 && hour < 9) return 'Tokyo'
-  return 'Sydney'
-}
-
 function updateTime() {
   const time = timeFormatter.format(new Date())
   clocks.forEach((clock) => {
     clock.textContent = time
-  })
-
-  const session = currentSession()
-  document.querySelectorAll<HTMLElement>('[data-session]').forEach((el) => {
-    el.textContent = session
   })
 }
 
@@ -765,24 +719,3 @@ window.setInterval(updateTime, 20000)
 document.querySelectorAll<HTMLElement>('[data-year]').forEach((el) => {
   el.textContent = String(new Date().getFullYear())
 })
-
-/* ------------------------------------------------------------------
-   A quiet live tick on the price readouts
-   ------------------------------------------------------------------ */
-
-const priceEls = Array.from(document.querySelectorAll<HTMLElement>('[data-price]'))
-let price = 1.2638
-
-if (priceEls.length > 0) {
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  if (!reduceMotion) {
-    window.setInterval(() => {
-      price = Math.max(1.24, Math.min(1.29, price + (Math.random() - 0.5) * 0.0009))
-      const text = price.toFixed(4)
-      priceEls.forEach((el) => {
-        el.textContent = text
-      })
-    }, 3600)
-  }
-}
