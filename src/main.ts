@@ -230,6 +230,7 @@ app.innerHTML = `
     <div class="topbar__end">
       <span class="status"><i class="status__dot" aria-hidden="true"></i>System online</span>
       <span class="topbar__clock"><b data-clock>--:--</b> UTC</span>
+      <a class="topbar__access" href="/access.html">Enter system</a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
@@ -244,6 +245,7 @@ app.innerHTML = `
     <a href="#intelligence"><span>01</span> Intelligence</a>
     <a href="#decisions"><span>02</span> Decisions</a>
     <a href="#human"><span>03</span> Human</a>
+    <a href="/access.html"><span>04</span> Enter system</a>
   </nav>
   <div class="menu__foot">
     <span>Private node</span>
@@ -271,13 +273,13 @@ app.innerHTML = `
           evidence, risk, and a reason.
         </p>
         <div class="hero__actions">
-          <a class="btn btn--primary" href="#intelligence">
+          <a class="btn btn--primary" href="/access.html">
+            <span>Enter system</span>
+            <span class="btn__arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="btn btn--ghost" href="#intelligence">
             <span>See how it thinks</span>
             <span class="btn__arrow" aria-hidden="true">↓</span>
-          </a>
-          <a class="btn btn--ghost" href="#decisions">
-            <span>Open a decision</span>
-            <span class="btn__arrow" aria-hidden="true">→</span>
           </a>
         </div>
       </div>
