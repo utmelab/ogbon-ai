@@ -2280,3 +2280,36 @@ select.field__input option { background: #0b0f18; color: var(--ink); }
 }
 .overlay__actions .btn { justify-content: center; width: 100%; }
 .overlay__close { width: 100%; }
+
+.purchase__send {
+  margin-top: 1rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid rgba(34,211,238,0.22);
+  background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(124,58,237,0.06));
+}
+.purchase__send-v {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--display);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--cyan-bright);
+  word-break: break-all;
+}
+.purchase__send-v small {
+  font-size: 0.42em;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  vertical-align: 0.4em;
+}
+.purchase__send-note {
+  margin-top: 0.6rem;
+  font-family: var(--mono);
+  font-size: 8px;
+  line-height: 1.6;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}

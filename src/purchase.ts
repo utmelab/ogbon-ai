@@ -36,18 +36,24 @@ app.innerHTML = `
         Final step
         <span class="kicker__tag">Secure your node</span>
       </p>
-      <h1 class="access__title" id="purchase-title">Claim your <em>space.</em></h1>
-      <p class="access__sub">Welcome, ${escapeHtml(name)}. Send payment to activate your private node.</p>
+      <h1 class="access__title" id="purchase-title">Claim your space, <em>find your place.</em></h1>
+      <p class="access__sub">Welcome, ${escapeHtml(name)}. One payment, one node, your own.</p>
 
       <div class="purchase__price">
-        <span class="purchase__price-k">Amount due</span>
-        <strong class="purchase__price-v" data-btc-amount>… <small>BTC</small></strong>
-        <span class="purchase__price-net" data-usd-note>$1,500 USD · Bitcoin network</span>
+        <span class="purchase__price-k">You pay</span>
+        <strong class="purchase__price-v">$1,500 <small>USD</small></strong>
+        <span class="purchase__price-net">Bitcoin network · BTC</span>
+      </div>
+
+      <div class="purchase__send">
+        <span class="purchase__k">Send exactly</span>
+        <strong class="purchase__send-v" data-btc-amount>… <small>BTC</small></strong>
+        <p class="purchase__send-note" data-usd-note>Calculating the live BTC amount…</p>
       </div>
 
       <div class="purchase__box">
         <div class="purchase__row purchase__row--stack">
-          <span class="purchase__k">Wallet address</span>
+          <span class="purchase__k">Send to this Bitcoin address</span>
           <div class="purchase__wallet">
             <code data-wallet>1N4SLz7EpW8hkSRpyp7J8eG5mo7yUjKMeQ</code>
             <button class="purchase__copy" type="button" data-copy>Copy</button>
@@ -68,7 +74,7 @@ app.innerHTML = `
         <span class="btn__arrow" aria-hidden="true">→</span>
       </button>
 
-      <p class="purchase__hint" data-hint>Calculating the exact BTC amount for $1,500…</p>
+      <p class="purchase__hint" data-hint>Send the exact BTC amount above to the wallet address.</p>
     </section>
   </main>
 </div>
@@ -129,12 +135,12 @@ async function loadBtcAmount() {
     const btc = USD_AMOUNT / usd
     const btcText = btc.toFixed(8)
     if (btcAmount) btcAmount.innerHTML = `${btcText} <small>BTC</small>`
-    if (usdNote) usdNote.textContent = `$${USD_AMOUNT.toLocaleString()} USD · 1 BTC = $${usd.toLocaleString()} · Bitcoin network`
-    if (hint) hint.textContent = `Send exactly ${btcText} BTC ($${USD_AMOUNT.toLocaleString()} USD) to the wallet address above.`
+    if (usdNote) usdNote.textContent = `1 BTC = $${usd.toLocaleString()} USD · Live rate`
+    if (hint) hint.textContent = `Send exactly ${btcText} BTC to pay $${USD_AMOUNT.toLocaleString()}.`
   } catch {
     if (btcAmount) btcAmount.innerHTML = `— <small>BTC</small>`
-    if (usdNote) usdNote.textContent = `$${USD_AMOUNT.toLocaleString()} USD · Live rate unavailable · Bitcoin network`
-    if (hint) hint.textContent = 'Live rate unavailable. Refresh to calculate the exact BTC amount.'
+    if (usdNote) usdNote.textContent = 'Live rate unavailable.'
+    if (hint) hint.textContent = 'Refresh to get the exact BTC amount for $1,500.'
   }
 }
 
