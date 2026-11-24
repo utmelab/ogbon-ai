@@ -1,5 +1,4 @@
 import './style.css'
-import { initMarketField } from './background'
 import { initNeuralCore } from './core'
 
 /* ------------------------------------------------------------------
@@ -230,7 +229,7 @@ app.innerHTML = `
     </nav>
     <div class="topbar__end">
       <span class="status"><i class="status__dot" aria-hidden="true"></i>System online</span>
-      <span class="topbar__clock"><b data-clock>--:--</b> WAT</span>
+      <span class="topbar__clock"><b data-clock>--:--</b> UTC</span>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
@@ -247,34 +246,33 @@ app.innerHTML = `
     <a href="#human"><span>03</span> Human</a>
   </nav>
   <div class="menu__foot">
-    <span>Private node · Lagos, NG</span>
+    <span>Private node</span>
     <span data-clock>--:--</span>
   </div>
 </div>
 
 <main id="top">
   <section class="hero">
-    <canvas class="hero__field" data-field aria-hidden="true"></canvas>
+    <div class="hero__art" aria-hidden="true"></div>
     <div class="hero__veil" aria-hidden="true"></div>
 
     <div class="wrap hero__inner">
       <div class="hero__copy">
         <p class="kicker">
           <span class="kicker__dot" aria-hidden="true"></span>
-          Institutional-grade market intelligence
+          Institutional market intelligence
           <span class="kicker__tag">Private node</span>
         </p>
         <h1 class="hero__title">
           The AI <em>reasons.</em><br />You decide.
         </h1>
         <p class="hero__sub">
-          A private intelligence layer. It reads real-time institutional flow,
-          weighs the risk, and returns a reasoned call — with the why. Nothing
-          executes without you.
+          Live institutional flow, weighed in real time. Each call comes with
+          evidence, risk, and a reason.
         </p>
         <div class="hero__actions">
           <a class="btn btn--primary" href="#intelligence">
-            <span>See the intelligence</span>
+            <span>See how it thinks</span>
             <span class="btn__arrow" aria-hidden="true">↓</span>
           </a>
           <a class="btn btn--ghost" href="#decisions">
@@ -282,12 +280,6 @@ app.innerHTML = `
             <span class="btn__arrow" aria-hidden="true">→</span>
           </a>
         </div>
-        <ul class="hero__facts">
-          <li><b>AI</b><span>Reasoning layer</span></li>
-          <li><b>Live</b><span>Institutional data</span></li>
-          <li><b>Human</b><span>Final call</span></li>
-          <li><b>Zero</b><span>Auto-execution</span></li>
-        </ul>
       </div>
 
       <div class="hero__core">
@@ -310,28 +302,17 @@ app.innerHTML = `
         </div>
       </div>
     </div>
-
-    <div class="hero__tape">
-      <div class="wrap hero__tape-inner">
-        <div class="tape-cell"><span>Mode</span><b>Intelligence</b></div>
-        <div class="tape-cell"><span>Data</span><b>Institutional</b></div>
-        <div class="tape-cell"><span>Bias</span><b>Long</b></div>
-        <div class="tape-cell"><span>Risk</span><b>Defined</b></div>
-        <div class="tape-cell"><span>Execution</span><b>Manual</b></div>
-        <div class="tape-cell tape-cell--verdict"><span>Verdict</span><b>Your call</b></div>
-      </div>
-    </div>
   </section>
 
   <section class="section intelligence" id="intelligence">
     <div class="wrap">
       <div class="section__head section__head--split" data-reveal>
         <div>
-          <p class="eyebrow"><span>01</span> The intelligence layer</p>
+          <p class="eyebrow"><span>01</span> The edge</p>
           <h2 class="section__title">The system gets you to <em>90.</em> You take it to <em>100.</em></h2>
         </div>
         <p class="section__lead">
-          It does the reading and the reasoning. You bring the judgment no model has.
+          Flow, structure, momentum, risk. Read live, explained plain.
         </p>
       </div>
 
@@ -339,25 +320,25 @@ app.innerHTML = `
         <div class="ratio__cell">
           <span class="ratio__v">90<small>%</small></span>
           <span class="ratio__k">The system</span>
-          <p>Real-time institutional flow, structure, momentum and risk — calls with at least 90% success.</p>
+          <p>Reads the market. Hits at least 90%.</p>
         </div>
         <span class="ratio__op" aria-hidden="true">+</span>
         <div class="ratio__cell">
           <span class="ratio__v">10<small>%</small></span>
           <span class="ratio__k">You</span>
-          <p>Your context, your conviction, your read of the moment.</p>
+          <p>Your read. The part no model has.</p>
         </div>
         <span class="ratio__op" aria-hidden="true">=</span>
         <div class="ratio__cell ratio__cell--total">
           <span class="ratio__v">100<small>%</small></span>
           <span class="ratio__k">The call</span>
-          <p>A decision you understand, trust, and execute yourself.</p>
+          <p>Clear enough to act on.</p>
         </div>
       </div>
 
       <div class="manifesto" data-reveal>
-        <p>Not a signal feed. Not a set-and-forget bot. <em>An intelligence layer.</em></p>
-        <p>No copied calls. No blind execution. <em>No trade without you.</em></p>
+        <p>Not a signal feed. Not a bot. <em>A reasoning engine.</em></p>
+        <p>No copied calls. No blind execution.</p>
       </div>
     </div>
   </section>
@@ -366,7 +347,7 @@ app.innerHTML = `
     <div class="wrap">
       <div class="section__head section__head--split" data-reveal>
         <div>
-          <p class="eyebrow"><span>02</span> Decision engine</p>
+          <p class="eyebrow"><span>02</span> Decision records</p>
           <h2 class="section__title">The case, <em>not the call.</em></h2>
         </div>
         <p class="section__lead">Three records. Evidence, risk, reasoning.</p>
@@ -406,11 +387,6 @@ app.innerHTML = `
 
           <p class="case__reason" data-field="reason"></p>
         </div>
-
-        <div class="case__foot">
-          <span>Reasoned · not predicted</span>
-          <span>Reviewed · human in the loop</span>
-        </div>
       </article>
     </div>
   </section>
@@ -419,47 +395,37 @@ app.innerHTML = `
     <div class="wrap">
       <div class="section__head section__head--split" data-reveal>
         <div>
-          <p class="eyebrow"><span>03</span> Human in the loop</p>
-          <h2 class="section__title">It never trades <em>without you.</em></h2>
+          <p class="eyebrow"><span>03</span> Execution</p>
+          <h2 class="section__title">Nothing fires <em>on its own.</em></h2>
         </div>
         <p class="section__lead">
-          The AI reasons and explains. You review, decide, and execute.
+          The model reads the market and lays out the case. You decide if it is worth taking.
         </p>
       </div>
 
       <div class="handoff" data-reveal>
-        <div class="handoff__flow">
-          <span class="handoff__step">AI reasons</span>
-          <i aria-hidden="true">→</i>
-          <span class="handoff__step">You review</span>
-          <i aria-hidden="true">→</i>
-          <span class="handoff__step handoff__step--you">You execute</span>
-        </div>
         <div class="handoff__grid">
           <article class="handoff__side">
-            <span class="handoff__tag">The intelligence</span>
-            <h3>Reads. Weighs. Explains.</h3>
+            <span class="handoff__tag">The model</span>
+            <h3>Does the reading.</h3>
             <ul>
-              <li>Real-time institutional flow</li>
-              <li>Structure, momentum, risk</li>
-              <li>A verdict, with the why</li>
+              <li>Live institutional flow</li>
+              <li>Structure and momentum</li>
+              <li>Risk and invalidation</li>
+              <li>A verdict, with reasons</li>
             </ul>
           </article>
           <article class="handoff__side handoff__side--you">
-            <span class="handoff__tag">The authority</span>
-            <h3>Reviews. Decides. Owns.</h3>
+            <span class="handoff__tag">You</span>
+            <h3>Make the call.</h3>
             <ul>
-              <li>Your context and conviction</li>
-              <li>Your final judgment</li>
-              <li>Your execution</li>
+              <li>The final read</li>
+              <li>Size and timing</li>
+              <li>The order</li>
             </ul>
           </article>
         </div>
       </div>
-
-      <p class="handoff__note" data-reveal>
-        It hands you the reasoning. The decision stays yours.
-      </p>
     </div>
   </section>
 </main>
@@ -469,20 +435,18 @@ app.innerHTML = `
     <div class="footer__top">
       <div>
         <p class="footer__line">Wisdom, before the trade.</p>
-        <p class="footer__sub">A private intelligence layer. Not a signal service.</p>
+        <p class="footer__sub">Private by design.</p>
       </div>
       <div class="footer__meta">
-        <span>Lagos, NG</span>
+        <span>Private node</span>
         <span data-clock>--:--</span>
-        <span>Human in the loop</span>
+        <span>Model Ọ-1</span>
       </div>
     </div>
     <div class="footer__word" aria-hidden="true">ỌGBỌN</div>
     <div class="footer__fine">
       <span>© <span data-year>2026</span> ỌGBỌN</span>
-      <span>Institutional data</span>
-      <span>Human execution</span>
-      <span>Mark · Vite bolt</span>
+        <span>Mark · Vite bolt</span>
     </div>
   </div>
 </footer>
@@ -491,9 +455,6 @@ app.innerHTML = `
 /* ------------------------------------------------------------------
    Canvas layers
    ------------------------------------------------------------------ */
-
-const field = document.querySelector<HTMLCanvasElement>('[data-field]')
-if (field) initMarketField(field)
 
 const neural = document.querySelector<HTMLCanvasElement>('[data-neural]')
 if (neural) initNeuralCore(neural)
@@ -703,7 +664,7 @@ const timeFormatter = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
   minute: '2-digit',
   hour12: false,
-  timeZone: 'Africa/Lagos',
+  timeZone: 'UTC',
 })
 
 function updateTime() {
