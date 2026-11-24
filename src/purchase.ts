@@ -34,6 +34,7 @@ app.innerHTML = `
         <p class="pay__eyebrow">Node Access Payment</p>
         <h1 class="pay__amount" id="pay-title">$${USD_AMOUNT.toLocaleString()}.00</h1>
         <p class="pay__amount-sub">Amount payable</p>
+        <p class="pay__intro">Pay $1,500 USD in Bitcoin to activate your private node. The exact BTC amount and address are below.</p>
       </div>
 
       <div class="pay__block">
@@ -48,9 +49,9 @@ app.innerHTML = `
       <div class="pay__block">
         <div class="pay__block-head">
           <span>Payment address</span>
-          <button class="purchase__copy" type="button" data-copy>Copy</button>
         </div>
         <code class="pay__address" data-wallet>${WALLET}</code>
+        <button class="purchase__copy pay__copy" type="button" data-copy>Copy address</button>
       </div>
 
       <button class="btn btn--primary pay__submit" type="button" data-pay>
@@ -86,10 +87,10 @@ copy?.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(text)
     if (copy) copy.textContent = 'Copied'
-    setTimeout(() => { if (copy) copy.textContent = 'Copy' }, 1400)
+    setTimeout(() => { if (copy) copy.textContent = 'Copy address' }, 1400)
   } catch {
     if (copy) copy.textContent = 'Copy failed'
-    setTimeout(() => { if (copy) copy.textContent = 'Copy' }, 1400)
+    setTimeout(() => { if (copy) copy.textContent = 'Copy address' }, 1400)
   }
 })
 

@@ -2429,3 +2429,19 @@ select.field__input option { background: #0b0f18; color: var(--ink); }
   color: var(--faint);
   text-align: center;
 }
+
+.pay__intro {
+  max-width: 38ch;
+  margin: 1rem auto 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.pay__copy {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.9rem 1rem;
+}
+@media (min-width: 561px) {
+  .pay__copy { width: auto; }
+}
