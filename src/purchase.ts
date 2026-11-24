@@ -41,15 +41,15 @@ app.innerHTML = `
 
       <div class="purchase__price">
         <span class="purchase__price-k">Amount due</span>
-        <strong class="purchase__price-v">$1,500 <small>USDT</small></strong>
-        <span class="purchase__price-net">TRC20 network</span>
+        <strong class="purchase__price-v" data-btc-amount>… <small>BTC</small></strong>
+        <span class="purchase__price-net" data-usd-note>$1,500 USD · Bitcoin network</span>
       </div>
 
       <div class="purchase__box">
         <div class="purchase__row purchase__row--stack">
           <span class="purchase__k">Wallet address</span>
           <div class="purchase__wallet">
-            <code data-wallet>TQ9n8Y2kP4mX7vR3sL6wA1bC5dE8fG2hJk</code>
+            <code data-wallet>1N4SLz7EpW8hkSRpyp7J8eG5mo7yUjKMeQ</code>
             <button class="purchase__copy" type="button" data-copy>Copy</button>
           </div>
         </div>
@@ -68,7 +68,7 @@ app.innerHTML = `
         <span class="btn__arrow" aria-hidden="true">→</span>
       </button>
 
-      <p class="purchase__hint">Send the exact amount to the wallet address above.</p>
+      <p class="purchase__hint" data-hint>Calculating the exact BTC amount for $1,500…</p>
     </section>
   </main>
 </div>
@@ -92,6 +92,53 @@ const overlaySub = document.querySelector<HTMLElement>('[data-overlay-sub]')
 const overlayClose = document.querySelector<HTMLButtonElement>('[data-overlay-close]')
 const copy = document.querySelector<HTMLButtonElement>('[data-copy]')
 const wallet = document.querySelector<HTMLElement>('[data-wallet]')
+const btcAmount = document.querySelector<HTMLElement>('[data-btc-amount]')
+const usdNote = document.querySelector<HTMLElement>('[data-usd-note]')
+const hint = document.querySelector<HTMLElement>('[data-hint]')
+
+const USD_AMOUNT = 1500
+
+async function getBtcUsd() {
+  const endpoints: Array<() => Promise<number>> = [
+    async () => {
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd', { headers: { accept: 'application/json' } })
+      if (!res.ok) throw new Error('bad')
+      const data = await res.json() as { bitcoin?: { usd?: number } }
+      const usd = data?.bitcoin?.usd
+      if (!usd || !Number.isFinite(usd)) throw new Error('bad')
+      return usd
+    },
+    async () => {
+      const res = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot', { headers: { accept: 'application/json' } })
+      if (!res.ok) throw new Error('bad')
+      const data = await res.json() as { data?: { amount?: string } }
+      const usd = Number(data?.data?.amount)
+      if (!usd || !Number.isFinite(usd)) throw new Error('bad')
+      return usd
+    },
+  ]
+  for (const load of endpoints) {
+    try { return await load() } catch {}
+  }
+  throw new Error('unavailable')
+}
+
+async function loadBtcAmount() {
+  try {
+    const usd = await getBtcUsd()
+    const btc = USD_AMOUNT / usd
+    const btcText = btc.toFixed(8)
+    if (btcAmount) btcAmount.innerHTML = `${btcText} <small>BTC</small>`
+    if (usdNote) usdNote.textContent = `$${USD_AMOUNT.toLocaleString()} USD · 1 BTC = $${usd.toLocaleString()} · Bitcoin network`
+    if (hint) hint.textContent = `Send exactly ${btcText} BTC ($${USD_AMOUNT.toLocaleString()} USD) to the wallet address above.`
+  } catch {
+    if (btcAmount) btcAmount.innerHTML = `— <small>BTC</small>`
+    if (usdNote) usdNote.textContent = `$${USD_AMOUNT.toLocaleString()} USD · Live rate unavailable · Bitcoin network`
+    if (hint) hint.textContent = 'Live rate unavailable. Refresh to calculate the exact BTC amount.'
+  }
+}
+
+loadBtcAmount()
 
 copy?.addEventListener('click', async () => {
   const text = wallet?.textContent?.trim() || ''
