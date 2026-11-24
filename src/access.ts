@@ -18,10 +18,22 @@ app.innerHTML = `
 
   <main class="access__main">
     <section class="access__card" aria-labelledby="access-title">
+      <div class="purchase__overlay" data-overlay aria-hidden="true">
+        <div class="purchase__overlay-card purchase__overlay-card--error">
+          <p class="purchase__overlay-k" style="color:var(--ember)">Access denied</p>
+          <h2 class="purchase__overlay-title" style="color:var(--ember)" data-overlay-title>This email is not registered in the system.</h2>
+          <p class="purchase__overlay-sub">Request access to join the private node.</p>
+          <div class="overlay__actions">
+            <a class="btn btn--primary" href="/request.html"><span>Request access</span><span class="btn__arrow" aria-hidden="true">→</span></a>
+            <button class="btn btn--ghost overlay__close" type="button" data-overlay-close>Back to sign in</button>
+          </div>
+        </div>
+      </div>
+
       <p class="kicker">
         <span class="kicker__dot" aria-hidden="true"></span>
-        Secure node
-        <span class="kicker__tag">Invite only</span>
+        Private access
+        <span class="kicker__tag">Model Ọ-1</span>
       </p>
       <h1 class="access__title" id="access-title">Sign in to <em>ỌGBỌN.</em></h1>
       <p class="access__sub" data-sub>Private market intelligence. Authorized operators only.</p>
@@ -69,27 +81,10 @@ app.innerHTML = `
           <span>System status</span>
           <span class="access__mock-live"><i></i>Live</span>
         </div>
-        <div class="access__mock-metric">
-          <span class="access__mock-k">Model</span>
-          <strong>Ọ-1</strong>
-        </div>
-        <div class="access__mock-metric">
-          <span class="access__mock-k">Coverage</span>
-          <strong>Global markets</strong>
-        </div>
-        <div class="access__mock-metric">
-          <span class="access__mock-k">Latency</span>
-          <strong>42ms</strong>
-        </div>
-        <div class="access__mock-metric">
-          <span class="access__mock-k">Execution</span>
-          <strong>Manual only</strong>
-        </div>
-        <div class="access__mock-trace">
-          <span>Signal trace</span>
-          <div class="access__mock-bar"><i></i></div>
-          <span>14/14</span>
-        </div>
+        <div class="access__mock-metric"><span class="access__mock-k">Model</span><strong>Ọ-1</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Coverage</span><strong>Global markets</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Latency</span><strong>42ms</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Execution</span><strong>Manual only</strong></div>
       </div>
     </aside>
   </main>
@@ -104,6 +99,8 @@ const keyField = document.querySelector<HTMLElement>('[data-key-field]')
 const submitLabel = document.querySelector<HTMLElement>('[data-submit-label]')
 const sub = document.querySelector<HTMLElement>('[data-sub]')
 const title = document.querySelector<HTMLElement>('#access-title')
+const overlay = document.querySelector<HTMLElement>('[data-overlay]')
+const overlayClose = document.querySelector<HTMLButtonElement>('[data-overlay-close]')
 
 let mode: 'signin' | 'forgot' = 'signin'
 
@@ -111,6 +108,16 @@ function setStatus(message: string, tone: 'muted' | 'ok' | 'alert' = 'muted') {
   if (!status) return
   status.textContent = message
   status.dataset.tone = tone
+}
+
+function showOverlay() {
+  overlay?.classList.add('is-visible', 'is-error')
+  overlay?.setAttribute('aria-hidden', 'false')
+}
+
+function hideOverlay() {
+  overlay?.classList.remove('is-visible', 'is-error')
+  overlay?.setAttribute('aria-hidden', 'true')
 }
 
 function setMode(next: 'signin' | 'forgot') {
@@ -144,7 +151,6 @@ form?.addEventListener('submit', (event) => {
     setStatus('Enter your email address.', 'alert')
     return
   }
-
   if (mode === 'signin' && !key) {
     setStatus('Enter your access key.', 'alert')
     return
@@ -152,14 +158,11 @@ form?.addEventListener('submit', (event) => {
 
   setStatus('Checking…', 'muted')
   window.setTimeout(() => {
-    setStatus('This email is not registered in the system.', 'alert')
-  }, 700)
+    showOverlay()
+  }, 650)
 })
 
-forgot?.addEventListener('click', () => {
-  setMode(mode === 'forgot' ? 'signin' : 'forgot')
-})
-
-request?.addEventListener('click', () => {
-  window.location.href = '/request.html'
-})
+forgot?.addEventListener('click', () => setMode(mode === 'forgot' ? 'signin' : 'forgot'))
+request?.addEventListener('click', () => { window.location.href = '/request.html' })
+overlayClose?.addEventListener('click', hideOverlay)
+overlay?.addEventListener('click', (e) => { if (e.target === overlay) hideOverlay() })

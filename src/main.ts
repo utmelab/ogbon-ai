@@ -277,9 +277,9 @@ app.innerHTML = `
             <span>Enter system</span>
             <span class="btn__arrow" aria-hidden="true">→</span>
           </a>
-          <a class="btn btn--ghost" href="#intelligence">
-            <span>See how it thinks</span>
-            <span class="btn__arrow" aria-hidden="true">↓</span>
+          <a class="btn btn--ghost" href="/request.html">
+            <span>Request access</span>
+            <span class="btn__arrow" aria-hidden="true">→</span>
           </a>
         </div>
       </div>
