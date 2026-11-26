@@ -1,5 +1,6 @@
 import './style.css'
 import { initNeuralCore } from './core'
+import { initLang, langMarkup } from './lang'
 
 /* ------------------------------------------------------------------
    Types & data
@@ -230,6 +231,7 @@ app.innerHTML = `
     <div class="topbar__end">
       <span class="status"><i class="status__dot" aria-hidden="true"></i>System online</span>
       <span class="topbar__clock"><b data-clock>--:--</b> UTC</span>
+      ${langMarkup}
       <a class="topbar__access" href="/access.html">Enter system</a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>
         <span aria-hidden="true"></span>
@@ -682,3 +684,5 @@ window.setInterval(updateTime, 20000)
 document.querySelectorAll<HTMLElement>('[data-year]').forEach((el) => {
   el.textContent = String(new Date().getFullYear())
 })
+
+initLang()

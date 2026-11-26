@@ -1,4 +1,5 @@
 import './style.css'
+import { initLang, langMarkup } from './lang'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 if (!app) throw new Error('Missing #app')
@@ -15,7 +16,10 @@ app.innerHTML = `
       <svg class="brand__bolt" aria-hidden="true"><use href="#bolt"></use></svg>
       <span class="brand__word">ỌGBỌN</span>
     </a>
-    <a class="access__back" href="/request.html">Back</a>
+    <div class="access__top-end">
+      ${langMarkup}
+      <a class="access__back" href="/request.html">Back</a>
+    </div>
   </header>
 
   <main class="pay__main">
@@ -54,17 +58,10 @@ app.innerHTML = `
         <button class="purchase__copy pay__copy" type="button" data-copy>Copy address</button>
       </div>
 
-      <button class="btn btn--primary pay__submit" type="button" data-pay>
-        <span>I have sent payment</span>
-        <span class="btn__arrow" aria-hidden="true">→</span>
-      </button>
-
       <div class="proof" data-proof>
         <div class="proof__head">
-          <div>
-            <p class="pay__block-head"><span>Payment proof</span></p>
-            <p class="proof__sub">Upload a screenshot of your Bitcoin transfer.</p>
-          </div>
+          <p class="pay__block-head"><span>Payment proof</span></p>
+          <p class="proof__sub">Upload a screenshot of your Bitcoin transfer.</p>
         </div>
         <label class="proof__drop" data-drop>
           <input class="proof__input" type="file" accept="image/*" data-proof-input />
@@ -77,9 +74,13 @@ app.innerHTML = `
           <img alt="Payment proof preview" data-proof-img />
           <button class="proof__remove" type="button" data-proof-remove>Remove</button>
         </div>
-        <button class="btn btn--ghost pay__submit proof__submit" type="button" data-proof-submit>Submit proof</button>
         <p class="proof__status" role="status" aria-live="polite" data-proof-status></p>
       </div>
+
+      <button class="btn btn--primary pay__submit" type="button" data-pay>
+        <span>I have sent payment</span>
+        <span class="btn__arrow" aria-hidden="true">→</span>
+      </button>
 
       <p class="pay__fine">Send the exact BTC amount shown above. Access is granted after confirmation.${email ? ` Receipt: ${escapeHtml(email)}` : ''}</p>
     </section>
@@ -107,7 +108,6 @@ const proofInput = document.querySelector<HTMLInputElement>('[data-proof-input]'
 const proofPreview = document.querySelector<HTMLElement>('[data-proof-preview]')
 const proofImg = document.querySelector<HTMLImageElement>('[data-proof-img]')
 const proofRemove = document.querySelector<HTMLButtonElement>('[data-proof-remove]')
-const proofSubmit = document.querySelector<HTMLButtonElement>('[data-proof-submit]')
 const proofStatus = document.querySelector<HTMLElement>('[data-proof-status]')
 const proofTitle = document.querySelector<HTMLElement>('[data-proof-title]')
 const proofMeta = document.querySelector<HTMLElement>('[data-proof-meta]')
@@ -194,28 +194,35 @@ proofInput?.addEventListener('change', () => {
   proofPreview.hidden = false
   if (proofTitle) proofTitle.textContent = file.name
   if (proofMeta) proofMeta.textContent = `${Math.max(1, Math.round(file.size / 1024))} KB`
-  if (proofStatus) { proofStatus.textContent = ''; proofStatus.dataset.tone = ''; }
+  if (proofStatus) { proofStatus.textContent = 'Proof ready to submit.'; proofStatus.dataset.tone = 'muted' }
 })
 
 proofRemove?.addEventListener('click', () => {
-  proofFile = null
   if (proofInput) proofInput.value = ''
   if (proofPreview) proofPreview.hidden = true
   if (proofImg) proofImg.src = ''
   if (proofTitle) proofTitle.textContent = 'Choose image'
   if (proofMeta) proofMeta.textContent = 'PNG, JPG, or WEBP'
+  if (proofStatus) { proofStatus.textContent = ''; proofStatus.dataset.tone = ''; }
 })
 
-proofSubmit?.addEventListener('click', async () => {
-  if (!proofStatus) return
+overlayClose?.addEventListener('click', () => {
+  hideOverlay()
+  proofSection?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+})
+pay?.addEventListener('click', async () => {
   if (!proofFile) {
-    proofStatus.textContent = 'Select an image before submitting.'
-    proofStatus.dataset.tone = 'alert'
+    if (proofStatus) {
+      proofStatus.textContent = 'Upload payment proof before continuing.'
+      proofStatus.dataset.tone = 'alert'
+    }
+    proofSection?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     return
   }
-  proofStatus.textContent = 'Uploading proof…'
-  proofStatus.dataset.tone = 'muted'
-  proofSubmit?.setAttribute('disabled', 'true')
+
+  pay.disabled = true
+  pay.style.opacity = '0.7'
+  if (proofStatus) { proofStatus.textContent = 'Submitting proof…'; proofStatus.dataset.tone = 'muted' }
 
   try {
     const form = new FormData()
@@ -223,24 +230,18 @@ proofSubmit?.addEventListener('click', async () => {
     form.append('proof', proofFile)
     const res = await fetch('/api/payment-proof', { method: 'POST', body: form })
     const data = await res.json().catch(() => null) as { ok?: boolean; error?: string; message?: string } | null
-    if (!res.ok || !data?.ok) {
-      throw new Error(data?.error || 'Upload failed')
-    }
-    proofStatus.textContent = data.message || 'Proof received. We will review it after payment confirmation.'
-    proofStatus.dataset.tone = 'ok'
+    if (!res.ok || !data?.ok) throw new Error(data?.error || 'Could not upload proof.')
+    if (proofStatus) { proofStatus.textContent = 'Proof submitted.'; proofStatus.dataset.tone = 'ok' }
   } catch (err) {
-    proofStatus.textContent = err instanceof Error ? err.message : 'Could not upload proof.'
-    proofStatus.dataset.tone = 'alert'
-  } finally {
-    proofSubmit?.removeAttribute('disabled')
+    if (proofStatus) {
+      proofStatus.textContent = err instanceof Error ? err.message : 'Could not upload proof.'
+      proofStatus.dataset.tone = 'alert'
+    }
+    pay.disabled = false
+    pay.style.opacity = ''
+    return
   }
-})
 
-overlayClose?.addEventListener('click', () => {
-  hideOverlay()
-  proofSection?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-})
-pay?.addEventListener('click', () => {
   showOverlay()
   setOverlay('Processing payment…', 'Please ensure the payment has been made.')
   const steps = [
@@ -256,8 +257,12 @@ pay?.addEventListener('click', () => {
       return
     }
     window.clearInterval(timer)
-    setOverlay('No payment received.', 'No transfer found yet. Upload payment proof below if you already sent it.', true)
+    setOverlay('No payment received.', 'No transfer found yet. We have your proof and will keep checking.', true)
+    pay.disabled = false
+    pay.style.opacity = ''
   }, 1400)
 })
 
 loadBtcAmount()
+
+initLang()

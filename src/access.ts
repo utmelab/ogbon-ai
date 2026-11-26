@@ -1,4 +1,5 @@
 import './style.css'
+import { initLang, langMarkup } from './lang'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 if (!app) throw new Error('Missing #app')
@@ -13,7 +14,10 @@ app.innerHTML = `
       <span class="brand__slash" aria-hidden="true">/</span>
       <span class="brand__desc">Private access</span>
     </a>
-    <a class="access__back" href="/">Back to site</a>
+    <div class="access__top-end">
+      ${langMarkup}
+      <a class="access__back" href="/">Back to site</a>
+    </div>
   </header>
 
   <main class="access__main">
@@ -176,3 +180,5 @@ forgot?.addEventListener('click', () => setMode(mode === 'forgot' ? 'signin' : '
 request?.addEventListener('click', () => { window.location.href = '/request.html' })
 overlayClose?.addEventListener('click', hideOverlay)
 overlay?.addEventListener('click', (e) => { if (e.target === overlay) hideOverlay() })
+
+initLang()

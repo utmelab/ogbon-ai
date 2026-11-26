@@ -1,4 +1,5 @@
 import './style.css'
+import { initLang, langMarkup } from './lang'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 if (!app) throw new Error('Missing #app')
@@ -13,7 +14,10 @@ app.innerHTML = `
       <span class="brand__slash" aria-hidden="true">/</span>
       <span class="brand__desc">Request access</span>
     </a>
-    <a class="access__back" href="/access.html">Back to sign in</a>
+    <div class="access__top-end">
+      ${langMarkup}
+      <a class="access__back" href="/access.html">Back to sign in</a>
+    </div>
   </header>
 
   <main class="access__main">
@@ -110,3 +114,5 @@ form?.addEventListener('submit', async (event) => {
   sessionStorage.setItem('ogbon_request_name', name)
   window.location.href = '/purchase.html'
 })
+
+initLang()

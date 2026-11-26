@@ -2534,3 +2534,48 @@ select.field__input option { background: #0b0f18; color: var(--ink); }
 }
 .proof__status[data-tone="alert"] { color: var(--ember); }
 .proof__status[data-tone="ok"] { color: var(--cyan-bright); }
+
+/* ---------- language ---------- */
+.lang { position: relative; }
+.lang__btn {
+  min-width: 42px;
+  padding: 0.52rem 0.65rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.lang__btn:hover, .lang__btn[aria-expanded="true"] { color: var(--ink); border-color: var(--line-strong); }
+.lang__menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 30;
+  display: none; min-width: 150px;
+  padding: 0.35rem; border: 1px solid var(--line-strong);
+  background: rgba(11,15,24,0.96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px -30px rgba(0,0,0,0.9);
+}
+.lang.is-open .lang__menu { display: grid; }
+.lang__menu button {
+  padding: 0.7rem 0.75rem; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-size: 0.85rem; text-align: left; cursor: pointer;
+}
+.lang__menu button:hover { background: rgba(170,190,225,0.05); color: var(--ink); }
+.gt-hidden {
+  position: absolute !important;
+  width: 1px !important; height: 1px !important;
+  overflow: hidden !important; clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important; border: 0 !important;
+}
+.goog-te-banner-frame, .skiptranslate iframe, body > .skiptranslate { display: none !important; }
+body { top: 0 !important; }
+.goog-te-gadget { font-size: 0 !important; color: transparent !important; }
+.goog-te-gadget span, .goog-logo-link { display: none !important; }
+@media (max-width: 560px) {
+  .lang__btn { min-width: 38px; padding-inline: 0.5rem; }
+}
+.access__top-end { display: flex; align-items: center; gap: 0.75rem; }
