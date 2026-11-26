@@ -29,7 +29,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: a
     .trim()
     .toUpperCase() || FALLBACK_INVITE_CODE
   if (invite !== expectedInvite) {
-    return json({ ok: false, error: 'Unauthorized invite code.' }, 401)
+    return json({ ok: false, error: 'Unauthorized activation code.' }, 401)
   }
 
   try {

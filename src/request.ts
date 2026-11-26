@@ -59,8 +59,8 @@ app.innerHTML = `
           </select>
         </label>
         <label class="field">
-          <span class="field__label">Invite code</span>
-          <input class="field__input" name="invite" autocomplete="off" placeholder="Enter invite code" />
+          <span class="field__label">Activation code</span>
+          <input class="field__input" name="invite" autocomplete="off" placeholder="Enter activation code" />
         </label>
 
         <button class="btn btn--primary access__submit" type="submit">
@@ -77,8 +77,8 @@ app.innerHTML = `
           <span>Application</span>
           <span class="access__mock-live"><i></i>Private</span>
         </div>
-        <div class="access__mock-metric"><span class="access__mock-k">Access</span><strong>Invite only</strong></div>
-        <div class="access__mock-metric"><span class="access__mock-k">Invite code</span><strong>${inviteCode}</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Access</span><strong>Activation required</strong></div>
+        <div class="access__mock-metric"><span class="access__mock-k">Activation code</span><strong>${inviteCode}</strong></div>
         <div class="access__mock-metric"><span class="access__mock-k">Review</span><strong>Manual</strong></div>
         <div class="access__mock-metric"><span class="access__mock-k">Control</span><strong>Yours</strong></div>
       </div>
@@ -111,7 +111,7 @@ form?.addEventListener('submit', async (event) => {
   }
 
   if (invite !== inviteCode) {
-    if (status) { status.textContent = 'Unauthorized invite code.'; status.dataset.tone = 'alert' }
+    if (status) { status.textContent = 'Unauthorized activation code.'; status.dataset.tone = 'alert' }
     return
   }
 
@@ -125,7 +125,7 @@ form?.addEventListener('submit', async (event) => {
     })
 
     if (res.status === 401) {
-      if (status) { status.textContent = 'Unauthorized invite code.'; status.dataset.tone = 'alert' }
+      if (status) { status.textContent = 'Unauthorized activation code.'; status.dataset.tone = 'alert' }
       return
     }
   } catch {}
