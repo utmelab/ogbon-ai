@@ -1,14 +1,14 @@
 import './style.css'
 import { initLang, langMarkup } from './lang'
 import { setFlow, getFlow } from './flow'
-import { BTC_WALLET } from './config'
+import { BTC_WALLET, PAYMENT_USD_AMOUNT } from './config'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 if (!app) throw new Error('Missing #app')
 
 const flow = getFlow()
 const email = sessionStorage.getItem('ogbon_request_email') || flow?.email || ''
-const USD_AMOUNT = 1500
+const USD_AMOUNT = PAYMENT_USD_AMOUNT
 const WALLET = BTC_WALLET
 setFlow({ step: 'purchase', email })
 
@@ -248,23 +248,27 @@ pay?.addEventListener('click', async () => {
 
   showOverlay()
   setOverlay('Processing payment…', 'Please ensure the payment has been made.')
+
   const steps = [
-    ['Processing payment…', 'Please ensure the payment has been made.'],
-    ['Confirming transaction…', 'Checking the network for your transfer.'],
-    ['Still checking…', 'This can take a moment.'],
-  ] as const
-  let i = 0
-  const timer = window.setInterval(() => {
-    i += 1
-    if (i < steps.length) {
-      setOverlay(steps[i][0], steps[i][1])
+    { title: 'Confirming transaction…', sub: 'Checking the network for your transfer.', delay: 2400 },
+    { title: 'Still checking…', sub: 'This can take a few minutes.', delay: 5 * 60 * 1000 },
+  ]
+
+  const runStep = (index: number) => {
+    const step = steps[index]
+    if (!step) {
+      setOverlay('No payment received.', 'No transfer found yet. We have your proof and will keep checking.', true)
+      pay.disabled = false
+      pay.style.opacity = ''
       return
     }
-    window.clearInterval(timer)
-    setOverlay('No payment received.', 'No transfer found yet. We have your proof and will keep checking.', true)
-    pay.disabled = false
-    pay.style.opacity = ''
-  }, 1400)
+    window.setTimeout(() => {
+      setOverlay(step.title, step.sub)
+      runStep(index + 1)
+    }, step.delay)
+  }
+
+  runStep(0)
 })
 
 loadBtcAmount()
