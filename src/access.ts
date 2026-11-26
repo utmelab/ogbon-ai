@@ -141,7 +141,7 @@ function setMode(next: 'signin' | 'forgot') {
   }
 }
 
-form?.addEventListener('submit', (event) => {
+form?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const data = new FormData(form)
   const email = String(data.get('email') || '').trim()
@@ -157,9 +157,19 @@ form?.addEventListener('submit', (event) => {
   }
 
   setStatus('Checking…', 'muted')
+  try {
+    const endpoint = mode === 'forgot' ? '/api/forgot-key' : '/api/login'
+    const payload = mode === 'forgot' ? { email } : { email, key }
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+  } catch {}
+
   window.setTimeout(() => {
     showOverlay()
-  }, 650)
+  }, 450)
 })
 
 forgot?.addEventListener('click', () => setMode(mode === 'forgot' ? 'signin' : 'forgot'))

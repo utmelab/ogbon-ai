@@ -59,6 +59,28 @@ app.innerHTML = `
         <span class="btn__arrow" aria-hidden="true">→</span>
       </button>
 
+      <div class="proof" data-proof>
+        <div class="proof__head">
+          <div>
+            <p class="pay__block-head"><span>Payment proof</span></p>
+            <p class="proof__sub">Upload a screenshot of your Bitcoin transfer.</p>
+          </div>
+        </div>
+        <label class="proof__drop" data-drop>
+          <input class="proof__input" type="file" accept="image/*" data-proof-input />
+          <div class="proof__drop-inner">
+            <strong data-proof-title>Choose image</strong>
+            <span data-proof-meta>PNG, JPG, or WEBP</span>
+          </div>
+        </label>
+        <div class="proof__preview" data-proof-preview hidden>
+          <img alt="Payment proof preview" data-proof-img />
+          <button class="proof__remove" type="button" data-proof-remove>Remove</button>
+        </div>
+        <button class="btn btn--ghost pay__submit proof__submit" type="button" data-proof-submit>Submit proof</button>
+        <p class="proof__status" role="status" aria-live="polite" data-proof-status></p>
+      </div>
+
       <p class="pay__fine">Send the exact BTC amount shown above. Access is granted after confirmation.${email ? ` Receipt: ${escapeHtml(email)}` : ''}</p>
     </section>
   </main>
@@ -81,6 +103,15 @@ const wallet = document.querySelector<HTMLElement>('[data-wallet]')
 const btcAmount = document.querySelector<HTMLElement>('[data-btc-amount]')
 const hint = document.querySelector<HTMLElement>('[data-hint]')
 const rate = document.querySelector<HTMLElement>('[data-rate]')
+const proofInput = document.querySelector<HTMLInputElement>('[data-proof-input]')
+const proofPreview = document.querySelector<HTMLElement>('[data-proof-preview]')
+const proofImg = document.querySelector<HTMLImageElement>('[data-proof-img]')
+const proofRemove = document.querySelector<HTMLButtonElement>('[data-proof-remove]')
+const proofSubmit = document.querySelector<HTMLButtonElement>('[data-proof-submit]')
+const proofStatus = document.querySelector<HTMLElement>('[data-proof-status]')
+const proofTitle = document.querySelector<HTMLElement>('[data-proof-title]')
+const proofMeta = document.querySelector<HTMLElement>('[data-proof-meta]')
+const proofSection = document.querySelector<HTMLElement>('[data-proof]')
 
 copy?.addEventListener('click', async () => {
   const text = wallet?.textContent?.trim() || ''
@@ -150,7 +181,65 @@ function setOverlay(message: string, sub: string, error = false) {
   if (overlayClose) overlayClose.style.display = error ? 'inline-flex' : 'none'
 }
 
-overlayClose?.addEventListener('click', hideOverlay)
+let proofFile: File | null = null
+
+proofInput?.addEventListener('change', () => {
+  const file = proofInput.files?.[0] || null
+  proofFile = file
+  if (!file || !proofPreview || !proofImg) {
+    if (proofPreview) proofPreview.hidden = true
+    return
+  }
+  proofImg.src = URL.createObjectURL(file)
+  proofPreview.hidden = false
+  if (proofTitle) proofTitle.textContent = file.name
+  if (proofMeta) proofMeta.textContent = `${Math.max(1, Math.round(file.size / 1024))} KB`
+  if (proofStatus) { proofStatus.textContent = ''; proofStatus.dataset.tone = ''; }
+})
+
+proofRemove?.addEventListener('click', () => {
+  proofFile = null
+  if (proofInput) proofInput.value = ''
+  if (proofPreview) proofPreview.hidden = true
+  if (proofImg) proofImg.src = ''
+  if (proofTitle) proofTitle.textContent = 'Choose image'
+  if (proofMeta) proofMeta.textContent = 'PNG, JPG, or WEBP'
+})
+
+proofSubmit?.addEventListener('click', async () => {
+  if (!proofStatus) return
+  if (!proofFile) {
+    proofStatus.textContent = 'Select an image before submitting.'
+    proofStatus.dataset.tone = 'alert'
+    return
+  }
+  proofStatus.textContent = 'Uploading proof…'
+  proofStatus.dataset.tone = 'muted'
+  proofSubmit?.setAttribute('disabled', 'true')
+
+  try {
+    const form = new FormData()
+    form.append('email', email)
+    form.append('proof', proofFile)
+    const res = await fetch('/api/payment-proof', { method: 'POST', body: form })
+    const data = await res.json().catch(() => null) as { ok?: boolean; error?: string; message?: string } | null
+    if (!res.ok || !data?.ok) {
+      throw new Error(data?.error || 'Upload failed')
+    }
+    proofStatus.textContent = data.message || 'Proof received. We will review it after payment confirmation.'
+    proofStatus.dataset.tone = 'ok'
+  } catch (err) {
+    proofStatus.textContent = err instanceof Error ? err.message : 'Could not upload proof.'
+    proofStatus.dataset.tone = 'alert'
+  } finally {
+    proofSubmit?.removeAttribute('disabled')
+  }
+})
+
+overlayClose?.addEventListener('click', () => {
+  hideOverlay()
+  proofSection?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+})
 pay?.addEventListener('click', () => {
   showOverlay()
   setOverlay('Processing payment…', 'Please ensure the payment has been made.')
@@ -167,7 +256,7 @@ pay?.addEventListener('click', () => {
       return
     }
     window.clearInterval(timer)
-    setOverlay('No payment received.', 'We could not confirm your transfer. Check the address and amount, then try again.', true)
+    setOverlay('No payment received.', 'No transfer found yet. Upload payment proof below if you already sent it.', true)
   }, 1400)
 })
 

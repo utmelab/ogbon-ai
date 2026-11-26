@@ -77,7 +77,7 @@ app.innerHTML = `
 const form = document.querySelector<HTMLFormElement>('[data-form]')
 const status = document.querySelector<HTMLElement>('[data-status]')
 
-form?.addEventListener('submit', (event) => {
+form?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const data = new FormData(form)
   const name = String(data.get('name') || '').trim()
@@ -92,6 +92,19 @@ form?.addEventListener('submit', (event) => {
     }
     return
   }
+
+  if (status) {
+    status.textContent = 'Saving your request…'
+    status.dataset.tone = 'muted'
+  }
+
+  try {
+    await fetch('/api/request-access', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, email, market, experience }),
+    })
+  } catch {}
 
   sessionStorage.setItem('ogbon_request_email', email)
   sessionStorage.setItem('ogbon_request_name', name)

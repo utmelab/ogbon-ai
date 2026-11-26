@@ -2445,3 +2445,92 @@ select.field__input option { background: #0b0f18; color: var(--ink); }
 @media (min-width: 561px) {
   .pay__copy { width: auto; }
 }
+
+/* proof upload */
+.proof {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+.proof__sub {
+  margin-top: 0.35rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.proof__drop {
+  display: block;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+.proof__input {
+  position: absolute;
+  width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.proof__drop-inner {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.2rem 1rem;
+  border: 1px dashed rgba(167,139,250,0.28);
+  background: rgba(124,58,237,0.04);
+  text-align: center;
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+.proof__drop:hover .proof__drop-inner,
+.proof__input:focus-visible + .proof__drop-inner {
+  border-color: rgba(167,139,250,0.5);
+  background: rgba(124,58,237,0.08);
+}
+.proof__drop-inner strong {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.proof__drop-inner span {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.proof__preview {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.proof__preview[hidden] { display: none !important; }
+.proof__preview img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+  background: rgba(5,6,10,0.5);
+}
+.proof__remove {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+.proof__remove:hover { color: var(--ember); }
+.proof__submit { margin-top: 1rem; }
+.proof__status {
+  min-height: 1.2em;
+  margin-top: 0.75rem;
+  font-family: var(--mono);
+  font-size: 8px;
+  line-height: 1.6;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.proof__status[data-tone="alert"] { color: var(--ember); }
+.proof__status[data-tone="ok"] { color: var(--cyan-bright); }
