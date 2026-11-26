@@ -6,8 +6,10 @@ const json = (data: unknown, status = 200) =>
     headers: { 'content-type': 'application/json; charset=utf-8' },
   })
 
+const FALLBACK_INVITE_CODE = 'OGBN2026'
+
 export const onRequestPost = async ({ request, env }: { request: Request; env: any }) => {
-  let body: { name?: string; email?: string; market?: string; experience?: string }
+  let body: { name?: string; email?: string; market?: string; experience?: string; invite?: string }
   try {
     body = await request.json()
   } catch {
@@ -18,8 +20,16 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: a
   const email = String(body.email || '').trim().toLowerCase()
   const market = String(body.market || '').trim()
   const experience = String(body.experience || '').trim()
+  const invite = String(body.invite || '').trim().toUpperCase()
   if (!name || !email || !market || !experience) {
     return json({ ok: false, error: 'All fields are required.' }, 400)
+  }
+
+  const expectedInvite = String(env.VITE_INVITE_CODE || env.INVITE_CODE || FALLBACK_INVITE_CODE)
+    .trim()
+    .toUpperCase() || FALLBACK_INVITE_CODE
+  if (invite !== expectedInvite) {
+    return json({ ok: false, error: 'Unauthorized invite code.' }, 401)
   }
 
   try {

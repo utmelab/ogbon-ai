@@ -1,5 +1,6 @@
 import './style.css'
 import { initLang, langMarkup } from './lang'
+import { getFlow } from './flow'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 if (!app) throw new Error('Missing #app')
@@ -180,5 +181,14 @@ forgot?.addEventListener('click', () => setMode(mode === 'forgot' ? 'signin' : '
 request?.addEventListener('click', () => { window.location.href = '/request.html' })
 overlayClose?.addEventListener('click', hideOverlay)
 overlay?.addEventListener('click', (e) => { if (e.target === overlay) hideOverlay() })
+
+const params = new URLSearchParams(location.search)
+if (params.get('reset') === '1') {
+  localStorage.removeItem('ogbon_flow')
+} else {
+  const flow = getFlow()
+  if (flow?.step === 'purchase') window.location.replace('/purchase.html')
+  else if (flow?.step === 'request') window.location.replace('/request.html')
+}
 
 initLang()

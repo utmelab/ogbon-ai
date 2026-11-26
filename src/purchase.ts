@@ -1,12 +1,16 @@
 import './style.css'
 import { initLang, langMarkup } from './lang'
+import { setFlow, getFlow } from './flow'
+import { BTC_WALLET } from './config'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 if (!app) throw new Error('Missing #app')
 
-const email = sessionStorage.getItem('ogbon_request_email') || ''
+const flow = getFlow()
+const email = sessionStorage.getItem('ogbon_request_email') || flow?.email || ''
 const USD_AMOUNT = 1500
-const WALLET = '1N4SLz7EpW8hkSRpyp7J8eG5mo7yUjKMeQ'
+const WALLET = BTC_WALLET
+setFlow({ step: 'purchase', email })
 
 app.innerHTML = `
 <div class="pay">
@@ -18,7 +22,7 @@ app.innerHTML = `
     </a>
     <div class="access__top-end">
       ${langMarkup}
-      <a class="access__back" href="/request.html">Back</a>
+      <a class="access__back" href="/request.html?reset=1">Back</a>
     </div>
   </header>
 

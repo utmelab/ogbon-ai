@@ -71,6 +71,8 @@ export const langMarkup = `
       <button type="button" data-lang-set="fr">Français</button>
       <button type="button" data-lang-set="es">Español</button>
       <button type="button" data-lang-set="pt">Português</button>
+      <button type="button" data-lang-set="tr">Türkçe</button>
+      <button type="button" data-lang-set="hi">हिन्दी</button>
       <button type="button" data-lang-set="ar">العربية</button>
     </div>
   </div>
